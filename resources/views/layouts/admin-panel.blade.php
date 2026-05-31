@@ -37,10 +37,26 @@
 
 <body class="bg-[#f0f2f0] antialiased">
 
-    <div class="flex h-screen overflow-hidden">
+    <div x-data="{ sidebarOpen: window.innerWidth > 768 }" class="flex h-screen overflow-hidden relative">
+
+        <!-- Mobile Sidebar Overlay Backdrop -->
+        <div x-show="sidebarOpen && window.innerWidth <= 768" 
+             @click="sidebarOpen = false"
+             x-transition.opacity 
+             style="display: none;" 
+             class="fixed inset-0 bg-black/40 z-40 md:hidden"></div>
 
         {{-- ===================== SIDEBAR ===================== --}}
-        <aside class="w-52 bg-[#1a5c2a] flex flex-col flex-shrink-0">
+        <aside x-show="sidebarOpen"
+               x-transition:enter="transition ease-out duration-300 transform"
+               x-transition:enter-start="-translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-200 transform"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="-translate-x-full"
+               @click.outside="if (window.innerWidth <= 768) sidebarOpen = false"
+               class="w-52 bg-[#1a5c2a] flex flex-col flex-shrink-0 fixed md:relative h-full z-50 transition-all duration-300"
+               style="display: none;">
             {{-- Logo --}}
             <div class="px-5 py-5 border-b border-white/10">
                 <div class="flex items-center gap-3">
@@ -98,9 +114,14 @@
         <div class="flex-1 flex flex-col overflow-hidden">
 
             {{-- TOP BAR --}}
-            <header class="bg-white h-14 flex items-center px-6 gap-4 border-b border-gray-200 flex-shrink-0">
+            <header class="bg-white h-14 flex items-center px-4 md:px-6 gap-3 border-b border-gray-200 flex-shrink-0">
+                <!-- Toggle Sidebar Button -->
+                <button @click="sidebarOpen = !sidebarOpen" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition text-[#1a5c2a] flex-shrink-0" type="button" title="Toggle Sidebar">
+                    <i class='bx bx-menu text-2xl'></i>
+                </button>
+
                 {{-- Search --}}
-                <form action="{{ route('admin.products.index') }}" method="GET" class="flex-1 max-w-md">
+                <form action="{{ route('admin.products.index') }}" method="GET" class="flex-1 max-w-md hidden sm:block">
                     <div class="relative">
                         <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
                         <input type="text" name="search" value="{{ request('search') }}"
