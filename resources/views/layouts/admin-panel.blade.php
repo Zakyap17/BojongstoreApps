@@ -215,6 +215,37 @@
         @if ($errors->any())
             Swal.fire({ icon: 'error', title: 'Gagal Menyimpan', text: 'Terdapat isian yang tidak valid atau wajib diisi. Silakan periksa kembali pesan error pada form.', confirmButtonColor: '#1a5c2a' });
         @endif
+
+        // Global SweetAlert2 delete confirmation
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (form.classList.contains('confirm-delete')) {
+                    e.preventDefault();
+                    const message = form.getAttribute('data-message') || 'Apakah Anda yakin ingin menghapus data ini?';
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6e7881',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        background: '#ffffff',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            confirmButton: 'rounded-lg px-4 py-2 text-sm font-semibold',
+                            cancelButton: 'rounded-lg px-4 py-2 text-sm font-semibold'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+        });
     </script>
 </body>
 

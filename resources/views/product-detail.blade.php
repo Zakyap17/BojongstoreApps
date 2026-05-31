@@ -345,19 +345,43 @@
             const deleteBtn = e.target.closest('.btn-delete-review');
             if (deleteBtn) {
                 const id = deleteBtn.dataset.id;
-                if (confirm('Apakah Anda yakin ingin menghapus ulasan ini?')) {
-                    fetch(`/reviews/${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            fetchReviews();
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Ulasan ini akan dihapus secara permanen.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6e7881',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    background: '#ffffff',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-lg px-4 py-2 text-sm font-semibold',
+                        cancelButton: 'rounded-lg px-4 py-2 text-sm font-semibold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/reviews/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
                         })
-                        .catch(err => console.error(err));
-                }
+                            .then(res => res.json())
+                            .then(data => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Ulasan berhasil dihapus.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                fetchReviews();
+                            })
+                            .catch(err => console.error(err));
+                    }
+                });
             }
         });
 

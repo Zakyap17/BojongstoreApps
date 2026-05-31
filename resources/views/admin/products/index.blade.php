@@ -161,7 +161,7 @@
                                         <i class='bx bx-edit-alt text-base'></i>
                                     </a>
                                     <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
-                                        onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                                        class="confirm-delete" data-message="Produk ini akan dihapus secara permanen dari katalog.">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                             class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">

@@ -130,7 +130,7 @@
                 {{-- Actions --}}
                 <div class="flex items-center justify-end pt-3 border-t border-gray-50">
                     <form action="{{ route('admin.review.destroy', $review->id) }}" method="POST"
-                          onsubmit="return confirm('Hapus ulasan ini?')">
+                          class="confirm-delete" data-message="Ulasan ini akan dihapus secara permanen dari sistem.">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium transition-colors">
                             <i class='bx bx-trash'></i> Hapus
