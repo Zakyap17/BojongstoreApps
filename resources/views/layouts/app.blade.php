@@ -14,6 +14,9 @@
 
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
 
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
