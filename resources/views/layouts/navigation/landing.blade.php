@@ -1,4 +1,4 @@
-<header x-data="{ scrolled: false }"
+﻿<header x-data="{ scrolled: false }"
         @scroll.window="scrolled = window.scrollY > 10"
         :class="{ 'header-scrolled': scrolled }">
     <div class="container">

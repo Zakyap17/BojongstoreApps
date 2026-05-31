@@ -18,6 +18,13 @@ class TwoFactorChallengeTest extends TestCase
         $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
     }
 
+    protected function skipUnlessFortifyHas(string $feature)
+    {
+        if (! Features::enabled($feature)) {
+            $this->markTestSkipped("Fortify feature [{$feature}] is not enabled.");
+        }
+    }
+
     public function test_two_factor_challenge_redirects_to_login_when_not_authenticated(): void
     {
         $response = $this->get(route('two-factor.login'));
@@ -34,7 +41,7 @@ class TwoFactorChallengeTest extends TestCase
 
         $user = User::factory()->withTwoFactor()->create();
 
-        $this->post(route('login.store'), [
+        $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'password',
         ])->assertRedirect(route('two-factor.login'));

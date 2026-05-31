@@ -428,7 +428,7 @@ footer {
   right: 20px;
   width: 44px;
   height: 44px;
-  background: #b1b1b1;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -866,7 +866,7 @@ footer {
 
 
 .btn-fav-circle.active {
-  background: #b1b1b1;
+  background: #ffffff;
   color: #064e3b;
 }
 

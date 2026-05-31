@@ -19,7 +19,9 @@
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Produk</p>
                 <p class="text-2xl font-bold text-gray-800">{{ number_format($total_products) }}</p>
-                <p class="text-xs text-[#1a5c2a] font-semibold mt-0.5">↑ +12% bulan ini</p>
+                <p class="text-xs {{ $productGrowth >= 0 ? 'text-[#1a5c2a]' : 'text-red-600' }} font-semibold mt-0.5">
+                    {{ $productGrowth > 0 ? '↑ +' : ($productGrowth < 0 ? '↓ ' : '') }}{{ $productGrowth }}% bulan ini
+                </p>
             </div>
         </div>
 
@@ -56,12 +58,12 @@
             <div class="relative flex-1 w-full">
                 <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
                 <input type="text" id="searchInput" placeholder="Sambal" onkeyup="filterTable()"
-                       class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-400">
+                    class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-400">
             </div>
 
             {{-- Category Filter --}}
             <select id="categoryFilter" onchange="filterTable()"
-                    class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 min-w-[160px]">
+                class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 min-w-[160px]">
                 <option value="">Semua Kategori</option>
                 @foreach(\App\Models\Category::all() as $cat)
                     <option value="{{ $cat->name }}">{{ $cat->name }}</option>
@@ -70,7 +72,7 @@
 
             {{-- Tambah Produk --}}
             <button onclick="document.getElementById('modalTambahProduk').classList.remove('hidden')"
-                    class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-sm">
+                class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-sm">
                 <i class='bx bx-plus text-lg'></i> Tambah Produk
             </button>
         </div>
@@ -80,11 +82,16 @@
             <table class="w-full" id="productTable">
                 <thead>
                     <tr class="border-b border-gray-100">
-                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Produk</th>
-                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Harga</th>
-                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Kategori</th>
-                        <th class="text-center py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Unggulan</th>
-                        <th class="text-right py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Aksi</th>
+                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Produk
+                        </th>
+                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Harga
+                        </th>
+                        <th class="text-left py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Kategori</th>
+                        <th class="text-center py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Unggulan</th>
+                        <th class="text-right py-3 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Aksi
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -105,70 +112,72 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-gray-800">{{ $product->name }}</p>
-                                    <p class="text-xs text-gray-400">SKU: PRD-{{ str_pad($product->id, 3, '0', STR_PAD_LEFT) }}</p>
-                                    @php $shopName = $product->umkm?->name ?? $product->seller; @endphp
-                                    @if($shopName)
-                                    <span class="inline-flex items-center gap-1 mt-0.5 text-xs font-semibold text-[#1a5c2a]">🏪 {{ $shopName }}</span>
-                                    @endif
+                                    <p class="text-xs text-gray-400">SKU:
+                                        PRD-{{ str_pad($product->id, 3, '0', STR_PAD_LEFT) }}</p>
                                 </div>
                             </div>
                         </td>
 
-                        {{-- Harga --}}
-                        <td class="py-3.5 px-5">
-                            <span class="text-sm font-semibold text-gray-700">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        </td>
+                            {{-- Harga --}}
+                            <td class="py-3.5 px-5">
+                                <span class="text-sm font-semibold text-gray-700">Rp
+                                    {{ number_format($product->price, 0, ',', '.') }}</span>
+                            </td>
 
-                        {{-- Kategori --}}
-                        <td class="py-3.5 px-5">
-                            @if($product->category)
-                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                    {{ in_array($product->category->name, ['Makanan', 'Minuman', 'Makanan & Minuman']) ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600' }}">
-                                    {{ $product->category->name }}
-                                </span>
-                            @else
-                                <span class="text-xs text-gray-400">—</span>
-                            @endif
-                        </td>
+                            {{-- Kategori --}}
+                            <td class="py-3.5 px-5">
+                                @if($product->category)
+                                    <span
+                                        class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                                                    {{ in_array($product->category->name, ['Makanan', 'Minuman', 'Makanan & Minuman']) ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600' }}">
+                                        {{ $product->category->name }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-400">—</span>
+                                @endif
+                            </td>
 
-                        {{-- Toggle Unggulan --}}
-                        <td class="py-3.5 px-5 text-center">
-                            <form action="{{ route('admin.products.toggleFeatured', $product->id) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" title="{{ $product->is_featured ? 'Nonaktifkan' : 'Jadikan Unggulan' }}"
-                                        class="relative inline-flex items-center w-11 h-6 rounded-full transition-colors focus:outline-none
-                                               {{ $product->is_featured ? 'bg-[#1a5c2a]' : 'bg-gray-200' }}">
-                                    <span class="inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform
-                                                 {{ $product->is_featured ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
-                                </button>
-                            </form>
-                        </td>
-
-                        {{-- Aksi --}}
-                        <td class="py-3.5 px-5 text-right">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('admin.products.edit', $product->id) }}"
-                                   class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-[#1a5c2a] transition-colors">
-                                    <i class='bx bx-edit-alt text-base'></i>
-                                </a>
-                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
-                                      onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
-                                    @csrf @method('DELETE')
+                            {{-- Toggle Unggulan --}}
+                            <td class="py-3.5 px-5 text-center">
+                                <form action="{{ route('admin.products.toggleFeatured', $product->id) }}" method="POST"
+                                    class="inline">
+                                    @csrf
                                     <button type="submit"
-                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
-                                        <i class='bx bx-trash text-base'></i>
+                                        title="{{ $product->is_featured ? 'Nonaktifkan' : 'Jadikan Unggulan' }}"
+                                        class="relative inline-flex items-center w-11 h-6 rounded-full transition-colors focus:outline-none
+                                                               {{ $product->is_featured ? 'bg-[#1a5c2a]' : 'bg-gray-200' }}">
+                                        <span
+                                            class="inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform
+                                                                 {{ $product->is_featured ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
                                     </button>
                                 </form>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+
+                            {{-- Aksi --}}
+                            <td class="py-3.5 px-5 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.products.edit', $product->id) }}"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-[#1a5c2a] transition-colors">
+                                        <i class='bx bx-edit-alt text-base'></i>
+                                    </a>
+                                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit"
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+                                            <i class='bx bx-trash text-base'></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="text-center py-16 text-gray-400">
-                            <i class='bx bx-package text-4xl mb-2 block'></i>
-                            <p class="text-sm">Belum ada produk. Tambah produk pertama Anda!</p>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="5" class="text-center py-16 text-gray-400">
+                                <i class='bx bx-package text-4xl mb-2 block'></i>
+                                <p class="text-sm">Belum ada produk. Tambah produk pertama Anda!</p>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -177,7 +186,8 @@
         {{-- Footer / Pagination --}}
         <div class="px-5 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p class="text-xs text-gray-400">
-                Menampilkan {{ $products->firstItem() }}–{{ $products->lastItem() }} dari {{ $products->total() }} produk
+                Menampilkan {{ $products->firstItem() }}–{{ $products->lastItem() }} dari {{ $products->total() }}
+                produk
             </p>
             <div class="text-sm">
                 {{ $products->links() }}
@@ -187,18 +197,19 @@
 
     {{-- ===================== MODAL TAMBAH PRODUK ===================== --}}
     <div id="modalTambahProduk"
-         class="hidden fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
-         onclick="if(event.target===this) this.classList.add('hidden')">
+        class="hidden fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
+        onclick="if(event.target===this) this.classList.add('hidden')">
 
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             {{-- Modal Header --}}
             <div class="px-7 pt-7 pb-4 flex items-start justify-between">
                 <div>
                     <h2 class="text-xl font-bold text-gray-900">Tambah Produk Baru</h2>
-                    <p class="text-sm text-gray-500 mt-1">Lengkapi informasi produk UMKM sesuai standar kualitas Bojongsoang untuk ditayangkan di BojongStore.</p>
+                    <p class="text-sm text-gray-500 mt-1">Lengkapi informasi produk UMKM sesuai standar kualitas
+                        Bojongsoang untuk ditayangkan di BojongStore.</p>
                 </div>
                 <button onclick="document.getElementById('modalTambahProduk').classList.add('hidden')"
-                        class="text-gray-400 hover:text-gray-600 transition-colors ml-4 mt-1">
+                    class="text-gray-400 hover:text-gray-600 transition-colors ml-4 mt-1">
                     <i class='bx bx-x text-2xl'></i>
                 </button>
             </div>
@@ -215,50 +226,50 @@
 
                             {{-- Main Image --}}
                             <label for="mainImageInput"
-                                   class="block w-full aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors relative overflow-hidden">
-                                <div id="mainImagePreview" class="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2">
+                                class="block w-full aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors relative overflow-hidden">
+                                <div id="mainImagePreview"
+                                    class="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2">
                                     <i class='bx bx-upload text-4xl'></i>
                                     <span class="text-sm font-medium">Pilih Foto Utama</span>
-                                    <span class="text-[10px] text-center text-gray-400 px-4">Format JPG, PNG atau WEBP.<br>Rekomendasi 1200×1600px (Maks. 5MB).</span>
+                                    <span class="text-[10px] text-center text-gray-400 px-4">Format JPG, PNG atau
+                                        WEBP.<br>Rekomendasi 1200×1600px (Maks. 5MB).</span>
                                 </div>
-                                <img id="mainImagePreviewImg" src="" alt="" class="hidden absolute inset-0 w-full h-full object-cover">
+                                <img id="mainImagePreviewImg" src="" alt=""
+                                    class="hidden absolute inset-0 w-full h-full object-cover">
                                 <input type="file" id="mainImageInput" name="image" accept="image/*" class="hidden"
-                                       onchange="previewMainImage(event)">
+                                    onchange="previewMainImage(event)">
                             </label>
-
-                            {{-- Extra slots --}}
-                            <div class="grid grid-cols-3 gap-2 mt-3">
-                                @for($i = 0; $i < 3; $i++)
-                                <label class="aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer flex items-center justify-center transition-colors">
-                                    <i class='bx bx-plus text-gray-300 text-2xl'></i>
-                                </label>
-                                @endfor
-                            </div>
                         </div>
 
                         {{-- RIGHT: Form Fields --}}
                         <div class="flex-1 space-y-4">
                             {{-- Nama Produk --}}
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nama Produk</label>
+                                <label
+                                    class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nama
+                                    Produk</label>
                                 <input type="text" name="name" placeholder="Contoh: Kripik Pisang Madu Organik"
-                                       class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
-                                       value="{{ old('name') }}" required>
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                    value="{{ old('name') }}" required>
                                 @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                             </div>
 
                             {{-- Harga & Kategori --}}
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Harga (RP)</label>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Harga
+                                        (RP)</label>
                                     <input type="number" name="price" placeholder="0" min="0"
-                                           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20"
-                                           value="{{ old('price') }}" required>
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20"
+                                        value="{{ old('price') }}" required>
                                 </div>
                                 <div>
-                                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Kategori</label>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Kategori</label>
                                     <select name="category_id"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20" required>
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20"
+                                        required>
                                         <option value="" disabled selected>Pilih Kategori</option>
                                         @foreach(\App\Models\Category::all() as $category)
                                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -266,47 +277,120 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('category_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                                    @error('category_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
                             {{-- Deskripsi --}}
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Deskripsi Produk</label>
-                                <textarea name="description" rows="4" placeholder="Jelaskan detail produk, bahan, dan keunggulan..."
-                                          class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300 resize-none"
-                                          required>{{ old('description') }}</textarea>
+                                <label
+                                    class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Deskripsi
+                                    Produk</label>
+                                <textarea name="description" rows="4"
+                                    placeholder="Jelaskan detail produk, bahan, dan keunggulan..."
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300 resize-none"
+                                    required>{{ old('description') }}</textarea>
                                 @error('description')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                             </div>
 
                             {{-- Toggle Unggulan --}}
                             <div class="border border-gray-200 rounded-xl p-4 flex items-center gap-4">
-                                <div class="w-9 h-9 bg-[#e8f5ec] rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-9 h-9 bg-[#e8f5ec] rounded-lg flex items-center justify-center flex-shrink-0">
                                     <i class='bx bxs-star text-[#1a5c2a]'></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm font-semibold text-gray-800">Jadikan Produk Unggulan</p>
-                                    <p class="text-xs text-gray-400">Produk akan tampil di halaman depan sebagai rekomendasi.</p>
+                                    <p class="text-xs text-gray-400">Produk akan tampil di halaman depan sebagai
+                                        rekomendasi.</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="is_featured" value="1" class="sr-only peer" {{ old('is_featured') ? 'checked' : '' }}>
-                                    <div class="w-11 h-6 bg-gray-200 peer-checked:bg-[#1a5c2a] rounded-full transition-colors"></div>
-                                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-checked:bg-[#1a5c2a] rounded-full transition-colors">
+                                    </div>
+                                    <div
+                                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5">
+                                    </div>
                                 </label>
                             </div>
 
-                            {{-- UMKM & Seller --}}
-                            <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nama Toko / UMKM</label>
-                                <select name="umkm_id"
-                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20">
-                                    <option value="">-- Pilih UMKM (opsional) --</option>
-                                    @foreach(\App\Models\Umkm::where('status','terverifikasi')->orderBy('name')->get() as $umkm)
-                                        <option value="{{ $umkm->id }}">{{ $umkm->name }} ({{ $umkm->category }})</option>
-                                    @endforeach
-                                </select>
-                                <p class="text-xs text-gray-400 mt-1">Atau isi nama penjual manual jika UMKM belum terdaftar.</p>
+                            {{-- Kontak & Sosial --}}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nomor
+                                        WhatsApp</label>
+                                    <input type="text" name="whatsapp" placeholder="Contoh: 628123456789"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('whatsapp') }}">
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Link
+                                        Shopee</label>
+                                    <input type="url" name="shoppee" placeholder="Contoh: https://shopee.co.id/..."
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('shoppee') }}">
+                                </div>
                             </div>
+
+                            {{-- Tags --}}
+                            <div>
+                                <label
+                                    class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Tags
+                                    (pisahkan dengan koma)</label>
+                                <input type="text" name="tags" placeholder="Contoh: keripik, pisang, manis"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                    value="{{ old('tags') }}">
+                            </div>
+
+                            {{-- Spesifikasi Produk --}}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Berat
+                                        Produk</label>
+                                    <input type="text" name="weight" placeholder="Contoh: 250g, 1 kg"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('weight') }}">
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Jenis
+                                        Produk</label>
+                                    <input type="text" name="type" placeholder="Contoh: Makanan, Minuman"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('type') }}">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Kemasan</label>
+                                    <input type="text" name="packaging" placeholder="Contoh: Pouch, Botol"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('packaging') }}">
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Daya
+                                        Tahan</label>
+                                    <input type="text" name="shelf_life" placeholder="Contoh: 6 bulan"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('shelf_life') }}">
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Produksi</label>
+                                    <input type="text" name="production" placeholder="Contoh: Setiap Hari"
+                                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                        value="{{ old('production') }}">
+                                </div>
+                            </div>
+
                             {{-- Hidden fields --}}
                             <input type="hidden" name="seller" value="{{ Auth::user()->name }}">
                         </div>
@@ -315,13 +399,12 @@
 
                 {{-- Modal Footer --}}
                 <div class="px-7 py-4 border-t border-gray-100 flex justify-end gap-3">
-                    <button type="button"
-                            onclick="document.getElementById('modalTambahProduk').classList.add('hidden')"
-                            class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">
+                    <button type="button" onclick="document.getElementById('modalTambahProduk').classList.add('hidden')"
+                        class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors">
                         Batal
                     </button>
                     <button type="submit"
-                            class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm">
+                        class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm">
                         <i class='bx bx-check'></i> Simpan
                     </button>
                 </div>
@@ -331,11 +414,11 @@
 
     {{-- Auto-open modal if validation errors exist --}}
     @if($errors->any())
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('modalTambahProduk').classList.remove('hidden');
-        });
-    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('modalTambahProduk').classList.remove('hidden');
+            });
+        </script>
     @endif
 
     <script>
@@ -344,7 +427,7 @@
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const img = document.getElementById('mainImagePreviewImg');
                 img.src = e.target.result;
                 img.classList.remove('hidden');

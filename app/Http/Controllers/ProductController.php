@@ -14,7 +14,7 @@ class ProductController extends Controller
                 ->with('auth_required', 'Anda perlu Login terlebih dahulu untuk mengakses konten.');
         }
 
-        $product = Product::with('umkm', 'category')->where('slug', $slug)->firstOrFail();
+        $product = Product::with('category')->where('slug', $slug)->firstOrFail();
         $product->increment('views');
         
         return view('product-detail', compact('product'));
@@ -24,7 +24,7 @@ class ProductController extends Controller
     {
         $query = $request->get('q');
         $categories = \App\Models\Category::all();
-        $products = Product::with('umkm')
+        $products = Product::query()
                     ->withAvg('reviews', 'rating')
                     ->withCount('reviews')
                     ->where(function($q) use ($query) {
@@ -42,7 +42,6 @@ class ProductController extends Controller
         $categories = \App\Models\Category::all();
 
         $products = Product::query()
-            ->with('umkm')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->when($request->categories, function ($q) use ($request) {
@@ -62,13 +61,13 @@ class ProductController extends Controller
 
     public function produkPage(Request $request)
     {
-        $featuredProducts = Product::with('umkm')
+        $featuredProducts = Product::query()
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->featured()
             ->get();
 
-        $regularProducts = Product::with('umkm')
+        $regularProducts = Product::query()
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->notFeatured()

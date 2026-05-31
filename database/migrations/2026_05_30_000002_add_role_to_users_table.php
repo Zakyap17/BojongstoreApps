@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('products', 'is_featured')) {
-            Schema::table('products', function (Blueprint $table) {
-                $table->boolean('is_featured')->default(false)->after('category_id');
+        if (!Schema::hasColumn('users', 'role')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('role')->default('user')->after('email');
             });
         }
     }
@@ -23,9 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('products', 'is_featured')) {
-            Schema::table('products', function (Blueprint $table) {
-                $table->dropColumn('is_featured');
+        if (Schema::hasColumn('users', 'role')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('role');
             });
         }
     }

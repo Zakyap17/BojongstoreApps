@@ -7,9 +7,11 @@ use App\Http\Controllers\UlasanController;
 
 // User Controllers
 use App\Http\Controllers\user\UserController;
+use App\Http\Controllers\user\FavoriteController;
 
 // Admin Controllers
 use App\Http\Controllers\admin\AdminController;
+use App\Http\Controllers\admin\ComplaintController;
 
 // ======= HALAMAN UTAMA & FRONTEND (dari main) =======
 Route::get('/', function () {
@@ -28,11 +30,14 @@ Route::get('/search', [ProductController::class, 'search'])->name('product.searc
 Route::get('/katalog', [ProductController::class, 'katalog'])->name('katalog');
 Route::get('/produk', [ProductController::class, 'produkPage'])->name('produk');
 
-// ======= FAVORIT =======
-Route::middleware('auth')->group(function () {
-    Route::get('/favorit', [\App\Http\Controllers\user\FavoriteController::class, 'index'])->name('favorit');
-    Route::post('/favorit/{product}/toggle', [\App\Http\Controllers\user\FavoriteController::class, 'toggle'])->name('favorit.toggle');
-});
+// Guest: tampilkan halaman (produk dimuat dari DB jika login, kosong jika tidak)
+Route::get('/favorit', function () {
+    if (auth()->check()) {
+        return app(FavoriteController::class)->index();
+    }
+    $products = collect();
+    return view('favorit', compact('products'));
+})->name('favorit');
 
 // ======= ULASAN / REVIEWS (dari main) =======
 Route::post('/reviews', [UlasanController::class, 'store'])->name('reviews.store');
@@ -57,6 +62,12 @@ Route::middleware(['auth', 'userMiddleware'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 });
 
+// ======= FAVORITES API (auth required) =======
+Route::middleware('auth')->group(function () {
+    Route::get('/api/favorites', [FavoriteController::class, 'list'])->name('favorites.list');
+    Route::post('/api/favorites/{product}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+});
+
 // ======= PROFILE (AUTH REQUIRED) =======
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -69,8 +80,11 @@ Route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::resource('admin/products', \App\Http\Controllers\admin\ProductController::class)->names('admin.products');
     Route::post('/admin/products/{product}/toggle-featured', [\App\Http\Controllers\admin\ProductController::class, 'toggleFeatured'])->name('admin.products.toggleFeatured');
-    Route::resource('admin/umkm', \App\Http\Controllers\admin\UmkmController::class)->names('admin.umkm');
     // Review
     Route::get('/admin/review', [\App\Http\Controllers\admin\ReviewController::class, 'index'])->name('admin.review.index');
     Route::delete('/admin/review/{review}', [\App\Http\Controllers\admin\ReviewController::class, 'destroy'])->name('admin.review.destroy');
+
+    // Complaints
+    Route::get('/admin/complaints', [ComplaintController::class, 'index'])->name('admin.complaints.index');
+    Route::delete('/admin/complaints/{id}', [ComplaintController::class, 'destroy'])->name('admin.complaints.destroy');
 });

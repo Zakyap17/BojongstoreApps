@@ -1,130 +1,255 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-extrabold text-2xl text-[#0a6634] leading-tight uppercase tracking-tight">
-            {{ __('Edit Produk: ') . $product->name }}
-        </h2>
-    </x-slot>
+<x-admin-panel>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-lg sm:rounded-2xl">
-                <div class="p-6 text-gray-900">
-                    @if ($errors->any())
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
+    {{-- Breadcrumb --}}
+    <div class="mb-1">
+        <nav class="text-xs text-gray-400 flex items-center gap-1.5">
+            <a href="{{ route('admin.products.index') }}" class="hover:text-gray-600">Produk</a>
+            <i class='bx bx-chevron-right'></i>
+            <span class="text-gray-600 font-medium">Edit Produk</span>
+        </nav>
+    </div>
+
+    {{-- Page Title --}}
+    <div class="mb-6">
+        <h1 class="text-xl font-bold text-gray-800">Edit Produk</h1>
+        <p class="text-sm text-gray-500 mt-0.5">{{ $product->name }}</p>
+    </div>
+
+    @if ($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
+            <ul class="list-disc list-inside space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+
+                {{-- LEFT: Image Upload --}}
+                <div class="lg:w-5/12 flex-shrink-0">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Foto Produk</p>
+
+                    @php
+                        $hasImage = !empty($product->image);
+                        $imgUrl = '';
+                        if ($hasImage) {
+                            $imgUrl = asset('storage/products/' . basename($product->image));
+                        }
+                    @endphp
+
+                    {{-- Main Image --}}
+                    <label for="mainImageInput"
+                        class="block w-full aspect-square border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors relative overflow-hidden">
+                        <div id="mainImagePreview"
+                            class="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2 {{ $hasImage ? 'hidden' : '' }}">
+                            <i class='bx bx-upload text-4xl'></i>
+                            <span class="text-sm font-medium">Pilih Foto Utama</span>
+                            <span class="text-[10px] text-center text-gray-400 px-4">Format JPG, PNG atau
+                                WEBP.<br>Rekomendasi 1200×1600px (Maks. 2MB).</span>
+                        </div>
+                        <img id="mainImagePreviewImg" src="{{ asset('storage/' . $product->image) }}"
+                            alt="{{ $product->name }}"
+                            class="{{ $hasImage ? '' : 'hidden' }} absolute inset-0 w-full h-full object-cover">
+                        <input type="file" id="mainImageInput" name="image" accept="image/*" class="hidden"
+                            onchange="previewMainImage(event)">
+                    </label>
+                </div>
+
+                {{-- RIGHT: Form Fields --}}
+                <div class="flex-1 space-y-4">
+                    {{-- Nama Produk --}}
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nama Produk
+                            <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" placeholder="Contoh: Kripik Pisang Madu Organik"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                            value="{{ old('name', $product->name) }}" required>
+                        @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- Harga & Kategori --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Harga
+                                (RP) <span class="text-red-500">*</span></label>
+                            <input type="number" name="price" placeholder="0" min="0"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20"
+                                value="{{ old('price', $product->price) }}" required>
+                            @error('price')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label
+                                class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Kategori
+                                <span class="text-red-500">*</span></label>
+                            <select name="category_id"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20"
+                                required>
+                                <option value="" disabled>Pilih Kategori</option>
+                                @foreach(\App\Models\Category::all() as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
                                 @endforeach
-                            </ul>
+                            </select>
+                            @error('category_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
-                    @endif
+                    </div>
 
-                    <form action="{{ route('admin.products.update', $product->id) }}" method="POST"
-                        enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <div class="mb-4">
-                                    <label for="name" class="block text-sm font-medium text-gray-700">Nama
-                                        Produk</label>
-                                    <input type="text" name="name" id="name" value="{{ old('name', $product->name) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm"
-                                        required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="umkm_id" class="block text-sm font-medium text-gray-700">Nama Toko / UMKM</label>
-                                    <select name="umkm_id" id="umkm_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm">
-                                        <option value="">-- Pilih UMKM (opsional) --</option>
-                                        @foreach($umkms as $umkm)
-                                            <option value="{{ $umkm->id }}" {{ old('umkm_id', $product->umkm_id) == $umkm->id ? 'selected' : '' }}>{{ $umkm->name }} ({{ $umkm->category }})</option>
-                                        @endforeach
-                                    </select>
-                                    <p class="text-xs text-gray-400 mt-1">Hanya UMKM terverifikasi yang ditampilkan. Jika kosong, isi nama penjual di bawah.</p>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="seller" class="block text-sm font-medium text-gray-700">Nama Penjual (jika tidak ada UMKM)</label>
-                                    <input type="text" name="seller" id="seller"
-                                        value="{{ old('seller', $product->seller) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm"
-                                        placeholder="Nama penjual manual jika belum ada di daftar UMKM">
-                                </div>
-                                <div class="mb-4">
-                                    <label for="price" class="block text-sm font-medium text-gray-700">Harga
-                                        (Rp)</label>
-                                    <input type="number" name="price" id="price"
-                                        value="{{ old('price', $product->price) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm"
-                                        required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="category_id"
-                                        class="block text-sm font-medium text-gray-700">Kategori</label>
-                                    <select name="category_id" id="category_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm"
-                                        required>
-                                        <option value="">Pilih Kategori</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="image" class="block text-sm font-medium text-gray-700">Gambar Produk
-                                        (Kosongkan jika tidak ingin diubah)</label>
-                                    <input type="file" name="image" id="image" class="mt-1 block w-full">
-                                    @if($product->image)
-                                        <div class="mt-2">
-                                            <img src="{{ asset('storage/' . str_replace('public/', '', $product->image)) }}" alt="{{ $product->name }}"
-                                                class="h-24 w-24 object-cover rounded">
-                                        </div>
-                                    @endif
-                                </div>
+                    {{-- Deskripsi --}}
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Deskripsi
+                            Produk <span class="text-red-500">*</span></label>
+                        <textarea name="description" rows="4"
+                            placeholder="Jelaskan detail produk, bahan, dan keunggulan..."
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300 resize-none"
+                            required>{{ old('description', $product->description) }}</textarea>
+                        @error('description')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- Toggle Unggulan --}}
+                    <div class="border border-gray-200 rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-9 h-9 bg-[#e8f5ec] rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class='bx bxs-star text-[#1a5c2a]'></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">Jadikan Produk Unggulan</p>
+                            <p class="text-xs text-gray-400">Produk akan tampil di halaman depan sebagai rekomendasi.
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="is_featured" value="1" class="sr-only peer" {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}>
+                            <div
+                                class="w-11 h-6 bg-gray-200 peer-checked:bg-[#1a5c2a] rounded-full transition-colors mb-0">
                             </div>
-
-                            <div>
-                                <div class="mb-4">
-                                    <label for="description"
-                                        class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                                    <textarea name="description" id="description" rows="5"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm"
-                                        required>{{ old('description', $product->description) }}</textarea>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="tags" class="block text-sm font-medium text-gray-700">Tags (pisahkan
-                                        dengan koma)</label>
-                                    <input type="text" name="tags" id="tags" value="{{ old('tags', $product->tags) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm">
-                                </div>
-                                <div class="mb-4">
-                                    <label for="shoppee" class="block text-sm font-medium text-gray-700">Link
-                                        Shopee</label>
-                                    <input type="url" name="shoppee" id="shoppee"
-                                        value="{{ old('shoppee', $product->shoppee) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm">
-                                </div>
-                                <div class="mb-4">
-                                    <label for="whatsapp" class="block text-sm font-medium text-gray-700">Nomor
-                                        WhatsApp</label>
-                                    <input type="text" name="whatsapp" id="whatsapp"
-                                        value="{{ old('whatsapp', $product->whatsapp) }}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0a6634] focus:ring-[#0a6634] sm:text-sm">
-                                </div>
+                            <div
+                                class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5">
                             </div>
-                        </div>
+                        </label>
+                    </div>
 
-                        <div class="mt-8 flex justify-end">
-                            <a href="{{ route('admin.products.index') }}"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg mr-4 transition-colors">Batal</a>
-                            <button type="submit"
-                                class="bg-[#0a6634] hover:bg-[#074724] text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors">Update
-                                Produk</button>
+                    {{-- Kontak & Sosial --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Nomor
+                                WhatsApp</label>
+                            <input type="text" name="whatsapp" placeholder="Contoh: 628123456789"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('whatsapp', $product->whatsapp) }}">
+                            @error('whatsapp')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
-                    </form>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Link
+                                Shopee</label>
+                            <input type="url" name="shoppee" placeholder="Contoh: https://shopee.co.id/..."
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('shoppee', $product->shoppee) }}">
+                            @error('shoppee')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    {{-- Tags --}}
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Tags
+                            (pisahkan dengan koma)</label>
+                        <input type="text" name="tags" placeholder="Contoh: keripik, pisang, manis"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                            value="{{ old('tags', is_array($product->tags) ? implode(', ', $product->tags) : $product->tags) }}">
+                        @error('tags')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- Spesifikasi Produk --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Berat
+                                Produk</label>
+                            <input type="text" name="weight" placeholder="Contoh: 250g, 1 kg"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('weight', $product->weight) }}">
+                            @error('weight')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Jenis
+                                Produk</label>
+                            <input type="text" name="type" placeholder="Contoh: Makanan, Minuman"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('type', $product->type) }}">
+                            @error('type')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label
+                                class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Kemasan</label>
+                            <input type="text" name="packaging" placeholder="Contoh: Pouch, Botol"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('packaging', $product->packaging) }}">
+                            @error('packaging')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Daya
+                                Tahan</label>
+                            <input type="text" name="shelf_life" placeholder="Contoh: 6 bulan"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('shelf_life', $product->shelf_life) }}">
+                            @error('shelf_life')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label
+                                class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Produksi</label>
+                            <input type="text" name="production" placeholder="Contoh: Setiap Hari"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a]/20 placeholder-gray-300"
+                                value="{{ old('production', $product->production) }}">
+                            @error('production')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    {{-- Hidden fields --}}
+                    <input type="hidden" name="seller"
+                        value="{{ old('seller', $product->seller ?? Auth::user()->name) }}">
                 </div>
             </div>
+
+            {{-- Actions --}}
+            <div class="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-4">
+                <a href="{{ route('admin.products.index') }}"
+                    class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
+                    Batal
+                </a>
+                <button type="submit"
+                    class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm">
+                    <i class='bx bx-check'></i> Update Produk
+                </button>
+            </div>
         </div>
-    </div>
-</x-app-layout>
+    </form>
+
+    <script>
+        // Preview gambar utama
+        function previewMainImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran foto produk maksimal 2MB (batasan server). Silakan pilih foto lain.');
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById('mainImagePreviewImg');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                document.getElementById('mainImagePreview').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+</x-admin-panel>

@@ -41,4 +41,20 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the model has two-factor authentication enabled.
+     */
+    public function withTwoFactor(): static
+    {
+        if (! class_exists(\Laravel\Fortify\RecoveryCode::class)) {
+            return $this;
+        }
+
+        return $this->state(fn (array $attributes) => [
+            'two_factor_secret' => encrypt('AES-256-CBC-key'),
+            'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
+            'two_factor_confirmed_at' => now(),
+        ]);
+    }
 }

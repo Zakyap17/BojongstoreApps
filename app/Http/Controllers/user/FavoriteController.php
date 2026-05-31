@@ -10,32 +10,47 @@ use Illuminate\Support\Facades\Auth;
 class FavoriteController extends Controller
 {
     /**
-     * Menampilkan daftar produk favorit pengguna.
+     * Menampilkan daftar produk favorit pengguna dari database.
      */
     public function index()
     {
-        // Get the authenticated user's favorite products
-        $products = Auth::user()->favorites()->latest()->get();
+        $products = Auth::user()
+            ->favorites()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->latest('favorites.created_at')
+            ->get();
+
         return view('favorit', compact('products'));
     }
 
     /**
-     * Menambah atau menghapus produk dari favorit (Toggle).
+     * Mengembalikan ID produk favorit user saat ini (untuk inisialisasi JS).
+     */
+    public function list()
+    {
+        if (!Auth::check()) {
+            return response()->json(['favorites' => []]);
+        }
+        $ids = Auth::user()->favorites()->pluck('products.id');
+        return response()->json(['favorites' => $ids]);
+    }
+
+    /**
+     * Toggle favorit via AJAX — menambah atau menghapus dari database.
      */
     public function toggle(Request $request, Product $product)
     {
         $user = Auth::user();
 
-        // Toggle the product in the user's favorites
         if ($user->favorites()->where('product_id', $product->id)->exists()) {
             $user->favorites()->detach($product->id);
-            $message = 'Produk dihapus dari favorit.';
+            $status = 'removed';
         } else {
             $user->favorites()->attach($product->id);
-            $message = 'Produk ditambahkan ke favorit.';
+            $status = 'added';
         }
 
-        // Return back with a success message
-        return back()->with('success', $message);
+        return response()->json(['status' => $status, 'product_id' => $product->id]);
     }
 }

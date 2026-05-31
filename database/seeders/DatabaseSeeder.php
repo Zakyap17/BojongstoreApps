@@ -15,11 +15,22 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@banjarsari.com',
-            'password' => bcrypt('admin12345'), // Use bcrypt for password hashing
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@banjarsari.com'],
+            [
+                'name' => 'Admin',
+                'password' => bcrypt('admin12345'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'admin@bojongstore.com'],
+            [
+                'name' => 'Admin BojongStore',
+                'password' => bcrypt('pplsi4702'),
+                'role' => 'admin',
+            ]
+        );
     }
 }

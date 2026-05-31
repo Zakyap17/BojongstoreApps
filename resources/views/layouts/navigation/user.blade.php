@@ -76,6 +76,14 @@
                     </a>
                     @endif
 
+                    @if(Auth::user()->role === 'admin')
+                    <div class="user-dropdown-divider"></div>
+                    <a href="{{ route('admin.dashboard') }}" class="user-dropdown-item" style="color:#1a5c2a;font-weight:600;">
+                        <i data-lucide="layout-dashboard" width="15" height="15"></i>
+                        Admin Dashboard
+                    </a>
+                    @endif
+
                     <div class="user-dropdown-divider"></div>
 
                     <form method="POST" action="{{ route('logout') }}">

@@ -1375,60 +1375,71 @@ footer {
 }
 
 .help-modal-content {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   width: 100%;
-  max-width: 500px;
+  max-width: 480px;
   border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  box-shadow: 0 35px 60px -15px rgba(26, 92, 42, 0.15), 0 0 0 1px rgba(255,255,255,0.6) inset;
   position: relative;
-  transform: scale(0.9);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
 }
 
 .help-modal-overlay.active .help-modal-content {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 .help-modal-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .help-modal-header i {
-  background: #ecfdf5;
+  background: linear-gradient(135deg, #e8f5ec 0%, #d4ede0 100%);
   color: var(--green-primary);
-  padding: 16px;
-  border-radius: 20px;
-  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 18px;
+  margin-bottom: 12px;
   display: inline-block;
+  box-shadow: 0 10px 20px -5px rgba(26, 92, 42, 0.15);
+  transform: rotate(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.help-modal-header:hover i {
+  transform: rotate(5deg) scale(1.05);
 }
 
 .help-modal-header h2 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--text-dark);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
 }
 
 .help-modal-header p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-gray);
+  line-height: 1.5;
 }
 
 .help-form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  position: relative;
 }
 
 .help-form-group label {
   display: block;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 8px;
+  color: #475569;
+  margin-bottom: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .help-input,
@@ -1436,51 +1447,75 @@ footer {
 .help-select {
   width: 100%;
   background: #f8fafc;
-  border: 1.5px solid #f1f5f9;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 14px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px;
   font-family: inherit;
-  transition: all 0.2s;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
 }
 
 .help-input:focus,
 .help-textarea:focus,
 .help-select:focus {
   outline: none;
-  border-color: var(--green-primary);
   background: white;
-  box-shadow: 0 0 0 4px rgba(28, 109, 37, 0.1);
+  border-color: #a7f3d0;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15), 0 4px 12px rgba(0,0,0,0.03);
+  transform: translateY(-1px);
+}
+
+.help-input::placeholder,
+.help-textarea::placeholder {
+  color: #94a3b8;
 }
 
 .help-textarea {
-  height: 120px;
+  height: 90px;
   resize: none;
+  line-height: 1.5;
 }
 
 .btn-help-submit {
   width: 100%;
-  background: var(--green-primary);
+  background: linear-gradient(135deg, var(--green-primary) 0%, #104825 100%);
   color: white;
-  padding: 16px;
-  border-radius: 14px;
+  padding: 12px;
+  border-radius: 10px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-  box-shadow: 0 10px 15px -3px rgba(28, 109, 37, 0.2);
+  gap: 8px;
+  margin-top: 8px;
+  box-shadow: 0 8px 20px -6px rgba(26, 92, 42, 0.35);
   cursor: pointer;
   border: none;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-help-submit::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .btn-help-submit:hover {
-  background: #154f1b;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px -5px rgba(26, 92, 42, 0.45);
+}
+
+.btn-help-submit:hover::after {
+  opacity: 1;
 }
 
 .btn-help-close {

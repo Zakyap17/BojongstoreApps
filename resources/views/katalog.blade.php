@@ -454,18 +454,9 @@
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-image" loading="lazy">
-                                    <button class="wishlist-btn"><i data-lucide="bookmark" width="18" height="18"></i></button>
+                                    <button class="wishlist-btn" data-slug="{{ $product->slug }}" data-product-id="{{ $product->id }}"><i data-lucide="bookmark" width="18" height="18"></i></button>
                                 </div>
                                 <div class="product-title">{{ $product->name }}</div>
-                                {{-- Badge nama toko / UMKM --}}
-                                @php $shopName = $product->umkm?->name ?? $product->seller; @endphp
-                                @if($shopName)
-                                <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:6px;">
-                                    <span style="font-size:11px;color:#fff;background:#00923F;border-radius:12px;padding:2px 8px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;">
-                                        🏪 {{ $shopName }}
-                                    </span>
-                                </div>
-                                @endif
                                 <div class="product-weight">{{ $product->weight ?? '300 gram' }}</div>
                                 <div class="product-rating-card" style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 8px;">
                                     <div class="stars" style="display: flex; gap: 2px; color: #fbbf24;">
@@ -501,5 +492,49 @@
             </div>
         </div>
     </div>
+    <script>
+        const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+        const csrfToken = '{{ csrf_token() }}';
 
+        async function initWishlist() {
+            if (!isLoggedIn) return;
+            try {
+                const res = await fetch('/api/favorites', { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+                const favoriteIds = new Set(data.favorites.map(String));
+                document.querySelectorAll('.wishlist-btn').forEach(btn => {
+                    const pid = btn.getAttribute('data-product-id');
+                    if (pid && favoriteIds.has(pid)) {
+                        btn.classList.add('active');
+                        const icon = btn.querySelector('svg') || btn.querySelector('i');
+                        if (icon) icon.setAttribute('fill', 'currentColor');
+                    }
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (!isLoggedIn) {
+                    window.location.href = '{{ route('login') }}';
+                    return;
+                }
+                const productId = btn.getAttribute('data-product-id');
+                if (!productId) return;
+                try {
+                    const res = await fetch(`/api/favorites/${productId}`, {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+                    btn.classList.toggle('active', data.status === 'added');
+                    const icon = btn.querySelector('svg') || btn.querySelector('i');
+                    if (icon) icon.setAttribute('fill', data.status === 'added' ? 'currentColor' : 'none');
+                } catch(err) { console.error(err); }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', initWishlist);
+    </script>
 @endsection

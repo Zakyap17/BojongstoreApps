@@ -269,15 +269,50 @@
   </div>
 
   <script>
-    // Wishlist Toggle
+    const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+    const csrfToken = '{{ csrf_token() }}';
+
+    async function initWishlist() {
+      if (!isLoggedIn) return;
+      try {
+        const res = await fetch('/api/favorites', { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        const favoriteIds = new Set(data.favorites.map(String));
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+          const pid = btn.getAttribute('data-product-id');
+          if (pid && favoriteIds.has(pid)) {
+            btn.classList.add('active');
+            const icon = btn.querySelector('svg') || btn.querySelector('i');
+            if (icon) icon.setAttribute('fill', 'currentColor');
+          }
+        });
+      } catch(e) { console.error(e); }
+    }
+
+    // Wishlist Toggle via API
     document.querySelectorAll('.wishlist-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        btn.classList.toggle('active');
-        const icon = btn.querySelector('i');
-        icon.setAttribute('fill', btn.classList.contains('active') ? 'currentColor' : 'none');
+        if (!isLoggedIn) {
+          window.location.href = '{{ route('login') }}';
+          return;
+        }
+        const productId = btn.getAttribute('data-product-id');
+        if (!productId) return;
+        try {
+          const res = await fetch(`/api/favorites/${productId}`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+          });
+          const data = await res.json();
+          btn.classList.toggle('active', data.status === 'added');
+          const icon = btn.querySelector('svg') || btn.querySelector('i');
+          if (icon) icon.setAttribute('fill', data.status === 'added' ? 'currentColor' : 'none');
+        } catch(err) { console.error(err); }
       });
     });
+
+    document.addEventListener('DOMContentLoaded', initWishlist);
 
     // Help Modal
     const helpModal = document.getElementById('helpModal');
