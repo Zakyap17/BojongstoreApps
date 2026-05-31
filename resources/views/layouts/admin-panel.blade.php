@@ -55,7 +55,7 @@
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="-translate-x-full"
                @click.outside="if (window.innerWidth <= 768) sidebarOpen = false"
-               class="w-52 bg-[#1a5c2a] flex flex-col flex-shrink-0 fixed md:relative h-full z-50 transition-all duration-300"
+               class="w-52 bg-[#1a5c2a] flex flex-col flex-shrink-0 fixed left-0 top-0 bottom-0 h-full z-50 transition-all duration-300"
                style="display: none;">
             {{-- Logo --}}
             <div class="px-5 py-5 border-b border-white/10">
@@ -111,7 +111,7 @@
         </aside>
 
         {{-- ===================== MAIN AREA ===================== --}}
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div :class="sidebarOpen ? 'md:pl-52' : 'md:pl-0'" class="flex-1 flex flex-col overflow-hidden transition-all duration-300">
 
             {{-- TOP BAR --}}
             <header class="bg-white h-14 flex items-center px-4 md:px-6 gap-3 border-b border-gray-200 flex-shrink-0">
