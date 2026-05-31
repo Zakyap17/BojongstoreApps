@@ -7,6 +7,10 @@
 
         <title>{{ config('app.name', 'Banjarsari') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="{{ asset('images/logo_tree.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo_tree.png') }}">
+
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->

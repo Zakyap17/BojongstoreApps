@@ -45,6 +45,13 @@ Route::post('/help-complaints', [\App\Http\Controllers\HelpComplaintController::
 // ======= AUTH ROUTES =======
 require __DIR__.'/auth.php';
 
+Route::get('/dashboard', function () {
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('user.dashboard');
+})->middleware(['auth'])->name('dashboard');
+
 // ======= USER DASHBOARD =======
 Route::middleware(['auth', 'userMiddleware'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
