@@ -357,7 +357,7 @@
 
     <footer style="background: #f0f4f1; padding: 80px 0 40px; border-top: 1px solid #e2e8f0;">
         <div class="container">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1.5fr; gap: 80px; margin-bottom: 60px;">
+            <div class="footer-grid">
                 <div>
                     <div class="logo-wrapper" style="margin-bottom: 20px;">
                         <span class="logo-text footer-logo-text" style="font-size: 20px;">BojongStore</span>
