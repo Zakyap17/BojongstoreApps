@@ -38,7 +38,7 @@
         {{-- Logo --}}
         <div class="px-5 py-5 border-b border-white/10">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+                <div class="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-sm">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain">
                 </div>
                 <div>
