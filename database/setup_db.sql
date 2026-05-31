@@ -1,0 +1,14 @@
+-- BojongStore Database Setup
+CREATE DATABASE IF NOT EXISTS bojongstore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bojongstore;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    telepon VARCHAR(20) DEFAULT NULL,
+    negara VARCHAR(100) DEFAULT 'Indonesia',
+    password VARCHAR(255) NOT NULL,
+    foto VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
