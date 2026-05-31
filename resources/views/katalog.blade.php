@@ -240,6 +240,28 @@
         }
 
 
+        .mobile-filter-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .mobile-filter-btn:hover {
+            background: var(--green-dark);
+        }
+
         /* Product Grid */
         .product-grid {
             display: grid;
@@ -254,21 +276,55 @@
         }
 
         @media (max-width: 768px) {
+            .mobile-filter-btn {
+                display: flex;
+            }
             .katalog-container {
                 flex-direction: column;
+                gap: 16px;
+                padding: 16px;
             }
             .sidebar-filter {
                 width: 100%;
                 position: static;
+                display: none;
+                background: #f9fafb;
+                padding: 20px;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+            }
+            .sidebar-filter.show-filters {
+                display: block;
             }
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
             }
         }
         
         @media (max-width: 480px) {
             .product-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .product-card {
+                padding: 16px 12px;
+            }
+            .product-image {
+                height: 110px;
+                margin-bottom: 12px;
+            }
+            .product-title {
+                font-size: 13px;
+                height: 34px;
+            }
+            .product-price {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+            .btn-secondary {
+                padding: 8px 12px;
+                font-size: 12px;
             }
         }
 
@@ -402,11 +458,17 @@
         }
     </style>
 
-    <div class="katalog-wrapper">
+    <div class="katalog-wrapper" x-data="{ filterOpen: false }">
         <div class="katalog-container">
             
+            <!-- Mobile Toggle Filter Button -->
+            <button @click="filterOpen = !filterOpen" class="mobile-filter-btn" type="button">
+                <i data-lucide="filter" width="18" height="18"></i>
+                <span x-text="filterOpen ? 'Sembunyikan Filter' : 'Tampilkan Filter'">Tampilkan Filter</span>
+            </button>
+
             {{-- Sidebar Filter --}}
-            <aside class="sidebar-filter">
+            <aside class="sidebar-filter" :class="{ 'show-filters': filterOpen }">
                 <form id="filter-form" action="{{ route('katalog') }}" method="GET">
                     
                     @if(request('search'))

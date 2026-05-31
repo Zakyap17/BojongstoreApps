@@ -186,6 +186,26 @@
     .fav-item-animate {
         animation: fadeInUp 0.5s ease backwards;
     }
+
+    @media (max-width: 768px) {
+        .favorites-title {
+            font-size: 28px !important;
+        }
+        .favorites-subtitle {
+            font-size: 14px !important;
+        }
+        .empty-state-fav {
+            padding: 40px 16px !important;
+            border-radius: 16px !important;
+        }
+        .breadcrumb {
+            margin-bottom: 20px !important;
+        }
+        .favorites-header {
+            margin-bottom: 24px !important;
+            padding-bottom: 16px !important;
+        }
+    }
 </style>
 @endpush
 
