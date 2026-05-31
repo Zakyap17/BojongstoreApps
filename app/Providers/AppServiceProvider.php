@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        \Illuminate\Database\Connection::resolverFor('pgsql', function ($connection, $database, $prefix, $config) {
+            return new \App\Database\PostgresConnection($connection, $database, $prefix, $config);
+        });
     }
 
     /**
