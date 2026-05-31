@@ -212,7 +212,9 @@ class ProductController extends Controller
      */
     public function toggleFeatured(Product $product)
     {
-        $product->update(['is_featured' => !$product->is_featured]);
+        $product->is_featured = !$product->is_featured;
+        $product->save();
+        
         $status = $product->is_featured ? 'dijadikan unggulan' : 'dihapus dari unggulan';
         return back()->with('success', "Produk berhasil {$status}.");
     }
