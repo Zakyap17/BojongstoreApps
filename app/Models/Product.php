@@ -41,12 +41,12 @@ class Product extends Model
 
     public function scopeFeatured($query)
     {
-        return $query->where('is_featured', true);
+        return $query->whereRaw('is_featured = true');
     }
 
     public function scopeNotFeatured($query)
     {
-        return $query->where('is_featured', false);
+        return $query->whereRaw('is_featured = false');
     }
 
     public function getShopNameAttribute(): string

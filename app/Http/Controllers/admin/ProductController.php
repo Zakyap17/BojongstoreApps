@@ -28,7 +28,7 @@ class ProductController extends Controller
 
         $products = $query->paginate(10)->withQueryString();
         $total_products = Product::count();
-        $total_featured = Product::where('is_featured', true)->count();
+        $total_featured = Product::whereRaw('is_featured = true')->count();
         $total_categories = Category::count();
         
         // Calculate Product Growth
