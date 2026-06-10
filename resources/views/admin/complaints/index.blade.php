@@ -56,8 +56,8 @@
                             </td>
                             <td class="px-6 py-4 text-center whitespace-nowrap">
                                 <form action="{{ route('admin.complaints.destroy', $complaint->id) }}" method="POST"
-                                    class="inline-block confirm-delete"
-                                    data-message="Data keluhan ini akan dihapus secara permanen dari sistem.">
+                                    class="inline-block"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data keluhan ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"

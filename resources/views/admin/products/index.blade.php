@@ -96,27 +96,32 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($products as $product)
-                    <tr class="hover:bg-gray-50/50 transition-colors" data-category="{{ $product->category->name ?? '' }}" data-name="{{ strtolower($product->name) }}">
-                        {{-- Produk --}}
-                        <td class="py-3.5 px-5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                    @if($product->image)
-                                        <img src="{{ $product->image_url }}"
-                                             alt="{{ $product->name }}" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full flex items-center justify-center">
-                                            <i class='bx bx-image text-gray-300 text-2xl'></i>
-                                        </div>
-                                    @endif
+                        <tr class="hover:bg-gray-50/50 transition-colors"
+                            data-category="{{ $product->category->name ?? '' }}"
+                            data-name="{{ strtolower($product->name) }}">
+                            {{-- Produk --}}
+                            <td class="py-3.5 px-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                        @if($product->image)
+                                            @php
+                                                $imgUrl = $product->image_url;
+                                            @endphp
+                                            <img src="{{ $imgUrl }}" alt="{{ $product->name }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <i class='bx bx-image text-gray-300 text-2xl'></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">{{ $product->name }}</p>
+                                        <p class="text-xs text-gray-400">SKU:
+                                            PRD-{{ str_pad($product->id, 3, '0', STR_PAD_LEFT) }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-800">{{ $product->name }}</p>
-                                    <p class="text-xs text-gray-400">SKU:
-                                        PRD-{{ str_pad($product->id, 3, '0', STR_PAD_LEFT) }}</p>
-                                </div>
-                            </div>
-                        </td>
+                            </td>
 
                             {{-- Harga --}}
                             <td class="py-3.5 px-5">
@@ -161,7 +166,7 @@
                                         <i class='bx bx-edit-alt text-base'></i>
                                     </a>
                                     <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
-                                        class="confirm-delete" data-message="Produk ini akan dihapus secara permanen dari katalog.">
+                                        onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                             class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">

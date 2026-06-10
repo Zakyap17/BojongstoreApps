@@ -73,7 +73,7 @@
                 @php
                     $product = \App\Models\Product::where('slug', $review->product_id)->first();
                     $prodName = $review->product_name ?: ($product ? $product->name : ucfirst(str_replace('-', ' ', $review->product_id)));
-                    $prodImage = $review->product_image ?: ($product ? $product->image : null);
+                    $prodImage = $product ? $product->image_url : ($review->product_image ? \Illuminate\Support\Facades\Storage::disk('s3')->url('products/' . basename($review->product_image)) : null);
                     $prodUmkm = $review->umkm_name ?: ($product ? ($product->seller ?: 'UMKM Admin BojongStore') : '—');
                     $revName = $review->reviewer_name ?: $review->user_name;
                     
@@ -95,7 +95,7 @@
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             @if($prodImage)
-                                <img src="{{ asset('storage/products/' . basename($prodImage)) }}" class="w-full h-full object-cover" alt="">
+                                <img src="{{ $prodImage }}" class="w-full h-full object-cover" alt="">
                             @else
                                 <i class='bx bx-box text-gray-400 text-lg'></i>
                             @endif
@@ -130,7 +130,7 @@
                 {{-- Actions --}}
                 <div class="flex items-center justify-end pt-3 border-t border-gray-50">
                     <form action="{{ route('admin.review.destroy', $review->id) }}" method="POST"
-                          class="confirm-delete" data-message="Ulasan ini akan dihapus secara permanen dari sistem.">
+                          onsubmit="return confirm('Hapus ulasan ini?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-medium transition-colors">
                             <i class='bx bx-trash'></i> Hapus

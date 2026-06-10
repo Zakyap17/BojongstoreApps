@@ -28,7 +28,6 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
@@ -41,12 +40,12 @@ class Product extends Model
 
     public function scopeFeatured($query)
     {
-        return $query->whereRaw('is_featured = true');
+        return $query->where('is_featured', true);
     }
 
     public function scopeNotFeatured($query)
     {
-        return $query->whereRaw('is_featured = false');
+        return $query->where('is_featured', false);
     }
 
     public function getShopNameAttribute(): string
@@ -54,30 +53,28 @@ class Product extends Model
         return $this->seller ?? 'UMKM Bojongsoang';
     }
 
-    /**
-     * Get the correct image URL regardless of how the path was stored.
-     * Handles 3 formats:
-     *   - '/images/foo.png'     → asset('/images/foo.png')
-     *   - 'public/products/...' → asset('storage/products/...')
-     *   - 'images/foo.png'      → asset('images/foo.png')
-     */
     public function getImageUrlAttribute(): string
     {
-        if (!$this->image) {
+        if (empty($this->image)) {
             return 'https://placehold.co/400x400/e8f5ee/00923F?text=' . urlencode($this->name ?? 'Produk');
         }
 
-        // Already an absolute URL (e.g. http://...)
-        if (str_starts_with($this->image, 'http')) {
+        // Absolute URL
+        if (\Illuminate\Support\Str::startsWith($this->image, ['http://', 'https://'])) {
             return $this->image;
         }
 
-        // Stored as 'public/...' (Laravel storage disk path)
-        if (str_starts_with($this->image, 'public/')) {
+        // Legacy: public folder path (/images/... atau images/...)
+        if (\Illuminate\Support\Str::startsWith($this->image, ['/images/', 'images/'])) {
+            return asset(ltrim($this->image, '/'));
+        }
+
+        // Legacy: stored as 'public/products/...' (old public disk path)
+        if (\Illuminate\Support\Str::startsWith($this->image, 'public/')) {
             return asset('storage/' . substr($this->image, 7));
         }
 
-        // Stored as '/images/...' or 'images/...' (public folder path)
-        return asset(ltrim($this->image, '/'));
+        // S3 / Supabase storage
+        return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->image);
     }
 }

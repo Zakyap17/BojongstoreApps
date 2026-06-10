@@ -447,6 +447,7 @@ footer {
   margin-bottom: 8px;
   color: #000;
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
 .product-rating-inline {
@@ -949,101 +950,11 @@ footer {
   font-weight: 800;
 }
 
-@media (max-width: 1024px) {
-  .product-detail-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 24px !important;
-  }
-}
-
 @media (max-width: 768px) {
-  .hero-banner {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 32px 24px !important;
-    min-height: auto !important;
-  }
-  .hero-content {
-    max-width: 100% !important;
-    margin-bottom: 24px !important;
-    text-align: center !important;
-  }
-  .hero-content h1 {
-    font-size: 28px !important;
-  }
-  .hero-content p {
-    max-width: 100% !important;
-    margin-bottom: 20px !important;
-  }
-  .hero-image {
-    position: static !important;
-    width: 100% !important;
-    height: 200px !important;
-    border-radius: 12px !important;
-    mask-image: none !important;
-    -webkit-mask-image: none !important;
-    object-fit: cover !important;
-  }
-
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
-  }
-  
-  .category-card {
-    padding: 20px 16px !important;
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
-  }
-
-  .product-card {
-    padding: 16px !important;
-  }
-
-  .product-image {
-    height: 120px !important;
-    margin-bottom: 12px !important;
-  }
-
-  .product-title {
-    font-size: 14px !important;
-    height: 36px !important;
-  }
-
-  .product-price {
-    font-size: 15px !important;
-    margin-bottom: 12px !important;
-  }
-
-  .btn-secondary {
-    padding: 8px 16px !important;
-    font-size: 12px !important;
-  }
 
   .product-detail-grid,
   .reviews-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .product-detail-grid {
-    gap: 24px !important;
-    padding: 20px 0 40px !important;
-  }
-
-  .product-main-image {
-    padding: 20px !important;
-  }
-
-  .product-info-content h1 {
-    font-size: 24px !important;
-  }
-
-  .btn-shopee,
-  .btn-whatsapp {
-    max-width: 100% !important;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1210,12 +1121,4 @@ footer {
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-}
-
-/* Footer Responsivitas */
-@media (max-width: 900px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
 }

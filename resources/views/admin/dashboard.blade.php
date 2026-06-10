@@ -65,7 +65,7 @@
 
         {{-- Aktivitas Terkini --}}
         <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+            <div class="flex items-center justify-between mb-5">
                 <h2 class="font-bold text-gray-800">Aktivitas Terkini</h2>
                 <a href="#" class="text-sm font-semibold text-[#1a5c2a] hover:underline">Lihat Semua</a>
             </div>

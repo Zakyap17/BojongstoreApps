@@ -19,25 +19,11 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
+    /**
+     * Handle an incoming authentication request.
+     */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // Check if two-factor is enabled before completing auth
-        $user = \App\Models\User::where('email', $request->email)->first();
-        if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
-            if ($user->two_factor_secret &&
-                in_array(\Laravel\Fortify\TwoFactorAuthenticatable::class, class_uses_recursive($user))) {
-                
-                $request->session()->put([
-                    'login.id' => $user->getKey(),
-                    'login.remember' => $request->boolean('remember'),
-                ]);
-
-                \Laravel\Fortify\Events\TwoFactorAuthenticationChallenged::dispatch($user);
-
-                return redirect()->route('two-factor.login');
-            }
-        }
-
         $request->authenticate();
 
         $request->session()->regenerate();
