@@ -204,15 +204,36 @@
                     class="px-5 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
                     Batal
                 </a>
-                <button type="submit"
+                <button type="submit" id="submitBtn"
                     class="flex items-center gap-2 bg-[#1a5c2a] hover:bg-[#154a22] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors shadow-sm">
-                    <i class='bx bx-check'></i> Simpan Produk
+                    <i class='bx bx-check' id="submitIcon"></i>
+                    <span id="submitText">Simpan Produk</span>
                 </button>
             </div>
         </div>
     </form>
 
+    {{-- Loading overlay --}}
+    <div id="uploadOverlay" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-xs w-full mx-4">
+            <svg class="animate-spin h-10 w-10 text-[#1a5c2a] mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.291l3-2z"></path>
+            </svg>
+            <p class="font-semibold text-gray-800 text-base">Menyimpan produk...</p>
+            <p class="text-sm text-gray-500 mt-1">Sedang mengunggah foto ke server</p>
+        </div>
+    </div>
+
     <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            document.getElementById('uploadOverlay').classList.remove('hidden');
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            document.getElementById('submitIcon').className = '';
+            document.getElementById('submitText').textContent = 'Menyimpan...';
+        });
+
         // Preview gambar utama
         function previewMainImage(event) {
             const file = event.target.files[0];

@@ -74,7 +74,11 @@ class Product extends Model
             return asset('storage/' . substr($this->image, 7));
         }
 
-        // S3 / Supabase storage
+        // S3 / Supabase storage — gunakan AWS_URL langsung, hindari inisiasi S3 client
+        $baseUrl = config('filesystems.disks.s3.url');
+        if ($baseUrl) {
+            return rtrim($baseUrl, '/') . '/' . ltrim($this->image, '/');
+        }
         return \Illuminate\Support\Facades\Storage::disk('s3')->url($this->image);
     }
 }

@@ -20,24 +20,33 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with('category')->latest();
-        
+
         if ($search = $request->get('search')) {
             $query->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
         }
 
         $products = $query->paginate(10)->withQueryString();
-        $total_products = Product::count();
-        $total_featured = Product::where('is_featured', true)->count();
+
+        // Single query untuk semua stats produk
+        $stats = \DB::selectOne("
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN is_featured = true THEN 1 ELSE 0 END) AS featured,
+                SUM(CASE WHEN DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW()) THEN 1 ELSE 0 END) AS this_month,
+                SUM(CASE WHEN DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW() - INTERVAL '1 month') THEN 1 ELSE 0 END) AS last_month
+            FROM products
+        ");
+
+        $total_products   = (int) $stats->total;
+        $total_featured   = (int) $stats->featured;
         $total_categories = Category::count();
-        
-        // Calculate Product Growth
-        $thisMonthProducts = Product::whereMonth('created_at', \Carbon\Carbon::now()->month)
-                                    ->whereYear('created_at', \Carbon\Carbon::now()->year)->count();
-        $lastMonthProducts = Product::whereMonth('created_at', \Carbon\Carbon::now()->subMonth()->month)
-                                    ->whereYear('created_at', \Carbon\Carbon::now()->subMonth()->year)->count();
-        $productGrowth = $lastMonthProducts == 0 ? ($thisMonthProducts > 0 ? 100 : 0) : round((($thisMonthProducts - $lastMonthProducts) / $lastMonthProducts) * 100);
-        
+        $thisMonthProducts = (int) $stats->this_month;
+        $lastMonthProducts = (int) $stats->last_month;
+        $productGrowth = $lastMonthProducts === 0
+            ? ($thisMonthProducts > 0 ? 100 : 0)
+            : round((($thisMonthProducts - $lastMonthProducts) / $lastMonthProducts) * 100);
+
         return view('admin.products.index', compact('products', 'total_products', 'total_featured', 'total_categories', 'productGrowth'));
     }
 
@@ -95,8 +104,7 @@ class ProductController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 's3');
-            $validatedData['image'] = $path;
+            $validatedData['image'] = $this->processAndStoreImage($request->file('image'));
         }
 
         $validatedData['slug'] = Str::slug($request->name);
@@ -169,8 +177,7 @@ class ProductController extends Controller
             if ($product->image && !\Illuminate\Support\Str::startsWith($product->image, '/images/')) {
                 Storage::disk('s3')->delete($product->image);
             }
-            $path = $request->file('image')->store('products', 's3');
-            $validatedData['image'] = $path;
+            $validatedData['image'] = $this->processAndStoreImage($request->file('image'));
         }
 
         $validatedData['slug'] = Str::slug($request->name);
@@ -215,5 +222,73 @@ class ProductController extends Controller
         $product->update(['is_featured' => !$product->is_featured]);
         $status = $product->is_featured ? 'dijadikan unggulan' : 'dihapus dari unggulan';
         return back()->with('success', "Produk berhasil {$status}.");
+    }
+
+    /**
+     * Kompres gambar dengan GD (resize + JPEG 82%) lalu upload ke S3.
+     * Jika GD tidak tersedia, upload file asli.
+     */
+    private function processAndStoreImage($file): string
+    {
+        if (!extension_loaded('gd')) {
+            return $file->store('products', 's3');
+        }
+
+        try {
+            $mime = $file->getMimeType();
+            $path = $file->getRealPath();
+
+            $src = match(true) {
+                str_contains($mime, 'jpeg'), str_contains($mime, 'jpg') => imagecreatefromjpeg($path),
+                str_contains($mime, 'png')  => imagecreatefrompng($path),
+                str_contains($mime, 'webp') => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($path) : null,
+                str_contains($mime, 'gif')  => imagecreatefromgif($path),
+                default => null,
+            };
+
+            if (!$src) {
+                return $file->store('products', 's3');
+            }
+
+            // Flatten PNG transparency ke background putih
+            if (str_contains($mime, 'png')) {
+                $w = imagesx($src);
+                $h = imagesy($src);
+                $bg = imagecreatetruecolor($w, $h);
+                imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
+                imagecopy($bg, $src, 0, 0, 0, 0, $w, $h);
+                imagedestroy($src);
+                $src = $bg;
+            }
+
+            // Resize jika lebih dari 1200px
+            $origW = imagesx($src);
+            $origH = imagesy($src);
+            $maxPx = 1200;
+
+            if ($origW > $maxPx || $origH > $maxPx) {
+                $ratio = min($maxPx / $origW, $maxPx / $origH);
+                $newW  = (int) round($origW * $ratio);
+                $newH  = (int) round($origH * $ratio);
+                $dst   = imagecreatetruecolor($newW, $newH);
+                imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                imagedestroy($src);
+                $src = $dst;
+            }
+
+            // Encode ke JPEG buffer
+            ob_start();
+            imagejpeg($src, null, 82);
+            $jpeg = ob_get_clean();
+            imagedestroy($src);
+
+            $filename = 'products/' . Str::random(40) . '.jpg';
+            Storage::disk('s3')->put($filename, $jpeg);
+
+            return $filename;
+        } catch (\Throwable $e) {
+            // Fallback ke upload original jika ada error GD
+            return $file->store('products', 's3');
+        }
     }
 }
